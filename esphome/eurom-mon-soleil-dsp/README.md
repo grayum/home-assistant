@@ -41,7 +41,7 @@ The board (`esp01_1m`), RX GPIO13, TX GPIO15 and 9600 baud are retained from the
 
 ## TYWE1S carrier-board connections and initial flashing
 
-Read the complete [connecting, backup and flashing instructions](TYWE1S_flashing.txt) before proceeding. The original notes and drawing were contributed by [Paul (@ph-wheels)](https://github.com/ph-wheels); spelling, sequencing and explanations were edited for this project. The original text did not include backup commands; the added esptool procedure is explicitly labelled as documentation guidance awaiting a hardware test record.
+Read the complete [connecting, backup and flashing instructions](TYWE1S_flashing.txt) before proceeding. The original notes and drawing were contributed by [Paul (@ph-wheels)](https://github.com/ph-wheels); spelling, sequencing and explanations were edited for this project. The original text did not include backup commands; the maintainer subsequently supplied the original 2 MiB backup command. The guide preserves that legacy example alongside modern esptool syntax and a two-read verification procedure, with physical testing still outstanding.
 
 ![Paul-contributed TYWE1S carrier-board pinout, with a four-pin connector at left and programming pads at top](images/pinout.png)
 
@@ -64,6 +64,8 @@ Read the complete [connecting, backup and flashing instructions](TYWE1S_flashing
 The carrier must be disconnected from the heater and all its wiring before connecting a computer or bench supply. The adapter's power output stays disconnected; the separate 5 V input is for carrier pin 4 only. Do not use RS-232 or 5 V UART signals. The supplied connector labels do not establish a traced GPIO13/GPIO15 mapping, measured voltage levels or mains isolation.
 
 **Back up before flashing:** the guide detects flash size, reads the full factory flash twice and compares the results. Matching reads check consistency, not recoverability; restoration has not been tested. Dumps may contain credentials, and they belong in private storage outside this repository. A Wi-Fi-module dump does not back up a separate heater MCU or establish how all timer settings are stored.
+
+The original backup example reads `0x200000` bytes (2 MiB). That is a supplied example, not a confirmed flash-capacity measurement; check `flash-id` and the existing `esp01_1m` (1 MiB) profile before proceeding. The guide also documents an **optional, destructive full erase after backup verification**, targeted at `esp8266`. The supplied `--chip esp32` erase command does not target this TYWE1S/ESP8266 device and is identified as a correction in the notes. Ordinary installation already erases sectors it writes; a separate full erase is not a routine update step.
 
 ## Setup in ESPHome Device Builder
 
@@ -114,4 +116,4 @@ Photographs supplied by the maintainer show the controls of the test unit; they 
 - [ESPHome Tuya MCU](https://esphome.io/components/tuya/), [Tuya climate](https://esphome.io/components/climate/tuya/) and [encrypted OTA](https://esphome.io/components/ota/esphome/).
 - [Espressif esptool commands](https://docs.espressif.com/projects/esptool/en/latest/esp8266/esptool/basic-commands.html), [manual reset options](https://docs.espressif.com/projects/esptool/en/latest/esp8266/esptool/advanced-options.html) and [ESP8266 boot mode selection](https://docs.espressif.com/projects/esptool/en/latest/esp8266/advanced-topics/boot-mode-selection.html) support the documentation-added backup procedure.
 
-Developed by [Graham van der Wielen](https://github.com/grayum) and [Paul (@ph-wheels)](https://github.com/ph-wheels). Maintained by Graham van der Wielen. Paul contributed the original TYWE1S connection/flashing instructions and carrier-board pinout. Created with assistance from ChatGPT & Codex (OpenAI). Independent community project; not affiliated with Eurom. See the repository [MIT License](../../LICENSE).
+Developed by [Graham van der Wielen](https://github.com/grayum) and [Paul (@ph-wheels)](https://github.com/ph-wheels). Paul developed the ESPHome YAML alongside **Claude AI (Anthropic)**, which provided code generation and coding assistance; he also contributed the original TYWE1S connection/flashing instructions and carrier-board pinout. Repository maintenance and documentation integration are by Graham van der Wielen, with assistance from ChatGPT & Codex (OpenAI). Independent community project; not affiliated with Eurom. See the repository [MIT License](../../LICENSE).
