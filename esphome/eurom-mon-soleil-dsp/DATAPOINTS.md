@@ -29,6 +29,10 @@ No changed datapoint was observed when testing the remote's open-window control.
 
 These values describe firmware settings for the test installation. They do not identify the exact module, confirm flash size, specify connector pin order or prove safe voltage levels/isolation. GPIO15 is an ESP8266 boot strap pin; the existing hardware must maintain correct boot conditions. Do not rewire based only on this table.
 
+## Separate carrier-board contribution
+
+[Paul (@ph-wheels)](https://github.com/ph-wheels) contributed [TYWE1S connection/flashing notes](TYWE1S_flashing.txt) and a [carrier-board pinout](images/pinout.png), supplied through the maintainer on 2026-10-29. The guide uses programming RXD0/TXD0 at carrier pins 9/10; the four-pin heater connector is separately labelled 1=RX, 2=TX, 3=GND, 4=5V. These are contributor-supplied carrier-board labels, not a new module pin definition or a traced mapping to the GPIO13/GPIO15 settings above. Board-revision measurements and independent verification remain open.
+
 ## Evidence needed for changes
 
 For a mapping change or new device, provide model/article number, revision, ESPHome version and a redacted sequence showing initial state, one physical/HA action, changed DP value/type and resulting display/heat indication. Include conflicting observations and unknown enum values. Keep private identifiers out of logs, and never intentionally trigger dangerous physical fault conditions.

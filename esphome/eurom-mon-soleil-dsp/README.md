@@ -8,7 +8,7 @@ Home Assistant communicates with ESPHome through its native API; ESPHome exchang
 
 ## Current scope
 
-This project provides configuration and operating notes for a suitable device **already running ESPHome with a verified MCU connection**. It is not yet a complete stock-to-ESPHome conversion guide. Factory firmware backup/restoration, initial flashing, module identification and the internal four-pin connector pinout are still [TODO](TODO.md). Do not infer a wiring or flashing procedure from the YAML.
+This project provides configuration and operating notes, plus [Paul's TYWE1S carrier-board connection and flashing guide](TYWE1S_flashing.txt) and the [supplied pinout](images/pinout.png). The edited guide adds a factory-flash backup procedure based on Espressif's documentation. These board-specific instructions have not been independently hardware-tested. Restoration, exact PCB-revision verification, electrical measurements and connector-to-GPIO tracing remain [TODO](TODO.md). Do not infer a wiring or flashing procedure from the YAML alone.
 
 This is a mains-powered heater. Internal work must be performed by a competent, qualified person with the appliance disconnected and made safe. Do not connect a computer/programmer to potentially mains-referenced electronics. Follow the manufacturer's placement and operating instructions, keep the heater uncovered and supervise experimental operation. Home Assistant availability, a fault sensor reading of zero and a successful software build are not safety guarantees.
 
@@ -39,15 +39,41 @@ Article numbers identify the product family, not verified electronics. Check the
 
 The board (`esp01_1m`), RX GPIO13, TX GPIO15 and 9600 baud are retained from the maintainer's source YAML. They are not a verified connector diagram or evidence that every production unit contains the same module.
 
+## TYWE1S carrier-board connections and initial flashing
+
+Read the complete [connecting, backup and flashing instructions](TYWE1S_flashing.txt) before proceeding. The original notes and drawing were contributed by [Paul (@ph-wheels)](https://github.com/ph-wheels); spelling, sequencing and explanations were edited for this project. The original text did not include backup commands; the added esptool procedure is explicitly labelled as documentation guidance awaiting a hardware test record.
+
+![Paul-contributed TYWE1S carrier-board pinout, with a four-pin connector at left and programming pads at top](images/pinout.png)
+
+**The numbers refer to the carrier board shown above, not to a bare TYWE1S module.** Use the orientation in the drawing. Its printed dimensions are approximately 49.6 × 31 mm and identify the supplied drawing, not a guarantee of compatibility with every board revision.
+
+| Carrier-board pin | Supplied label | Use in the contributed instructions |
+| --- | --- | --- |
+| 1 | RX | Four-pin heater connector; leave disconnected during programming |
+| 2 | TX | Four-pin heater connector; leave disconnected during programming |
+| 3 | GND | External supply ground |
+| 4 | 5V | Regulated 5 V DC input to this carrier board |
+| 5 | 3.3V | Not used by this procedure; never apply 5 V here |
+| 6 | GND | USB-to-UART adapter ground; temporary BOOT bridge ground |
+| 7 | BOOT | Temporarily bridged to pin 6 when powering up for serial bootloader entry |
+| 8 | TXD1 | Not used by this procedure |
+| 9 | RXD0 | Connect adapter TX, with verified 3.3 V TTL signaling |
+| 10 | TXD0 | Connect adapter RX, with verified 3.3 V TTL signaling |
+| 11 | RST | Not used by this procedure |
+
+The carrier must be disconnected from the heater and all its wiring before connecting a computer or bench supply. The adapter's power output stays disconnected; the separate 5 V input is for carrier pin 4 only. Do not use RS-232 or 5 V UART signals. The supplied connector labels do not establish a traced GPIO13/GPIO15 mapping, measured voltage levels or mains isolation.
+
+**Back up before flashing:** the guide detects flash size, reads the full factory flash twice and compares the results. Matching reads check consistency, not recoverability; restoration has not been tested. Dumps may contain credentials, and they belong in private storage outside this repository. A Wi-Fi-module dump does not back up a separate heater MCU or establish how all timer settings are stored.
+
 ## Setup in ESPHome Device Builder
 
-1. Back up your current **local ESPHome YAML and secrets** before editing. This is separate from the factory flash-backup procedure, which is not documented yet. If the heater is still on stock firmware, stop here until a verified conversion guide is available.
+1. Back up your current **local ESPHome YAML and secrets** before editing. For a matching TYWE1S carrier still running stock firmware, first read the [connection and flashing guide](TYWE1S_flashing.txt), verify the actual board and make a private factory flash backup before any installation. Other modules/revisions are not covered by that contribution.
 2. Use ESPHome **2026.10.1** for the documented validation baseline. The encrypted OTA syntax requires ESPHome 2026.9.0 or later; older versions are not covered by this example.
 3. Copy [eurom-400-wifi.yaml](eurom-400-wifi.yaml) to the Device Builder configuration directory, normally `/config/esphome/`. Keep an existing device's node name and encryption key when updating it. For an additional heater, choose a unique `esphome.name`, `friendly_name` and fallback AP SSID, and use a distinct device key and AP password.
 4. Merge the entries from [secrets.example.yaml](secrets.example.yaml) into your local `secrets.yaml` in the same directory. Do not overwrite an existing secrets file or reuse the example credentials.
 5. For a new device, generate a 32-byte base64 key with `openssl rand -base64 32`. Set a unique fallback AP password of 8-63 characters. For an existing device, retain its current API/OTA key: a new key in the uploader config alone will not rotate the installed key and can prevent updates.
 6. Review the GPIO, board and datapoint assumptions against your already verified installation. Validate the configuration, then compile it in Device Builder. A passing validation is not a successful firmware build. Check flash/OTA size limits for the 1 MB target before installing.
-7. Only update a known working ESPHome installation through its established update path. The example requires encrypted OTA. If the installed firmware does not yet offer it, follow the [official OTA migration procedure](https://esphome.io/components/ota/esphome/#enabling-encryption-on-an-existing-device), retaining the existing key/password as directed. No initial flashing procedure is provided here.
+7. For an existing ESPHome installation, use its established update path. The example requires encrypted OTA. If the installed firmware does not yet offer it, follow the [official OTA migration procedure](https://esphome.io/components/ota/esphome/#enabling-encryption-on-an-existing-device), retaining the existing key/password as directed. For a first serial installation on the matching carrier, follow the [contributed flashing guide](TYWE1S_flashing.txt) instead.
 8. In Home Assistant, use the discovered ESPHome integration, or add **ESPHome** under **Settings → Devices & services → Add integration** using the device hostname/IP and API key. Confirm the entities and state feedback before operating the heater. See the [official integration documentation](https://www.home-assistant.io/integrations/esphome/).
 9. In a supervised session, select **Thermostat (P)** for temperature regulation, then exercise Heat/Off and temperature changes and compare the physical display and logs. Use [TESTING.md](TESTING.md) to record results. Set the Home Assistant area locally if wanted.
 
@@ -75,6 +101,7 @@ Photographs supplied by the maintainer show the controls of the test unit; they 
 
 ## Project notes
 
+- [TYWE1S connecting, factory-backup and flashing instructions](TYWE1S_flashing.txt) and [carrier-board pinout](images/pinout.png)
 - [Datapoint evidence and unknowns](DATAPOINTS.md)
 - [Hardware test checklist and software validation record](TESTING.md)
 - [Backup, flashing, connector and compatibility TODO](TODO.md)
@@ -85,5 +112,6 @@ Photographs supplied by the maintainer show the controls of the test unit; they 
 
 - [Eurom product page](https://eurom.nl/product/permanente-verwarming/infrarood-verwarming/mon-soleil-dsp-400-wifi/) and [manufacturer manual/downloads page](https://eurom.nl/nl/manuals/). The supplied manual's English section, pages 48-63, was consulted for original operating behavior; no copy of the PDF is included in this repository.
 - [ESPHome Tuya MCU](https://esphome.io/components/tuya/), [Tuya climate](https://esphome.io/components/climate/tuya/) and [encrypted OTA](https://esphome.io/components/ota/esphome/).
+- [Espressif esptool commands](https://docs.espressif.com/projects/esptool/en/latest/esp8266/esptool/basic-commands.html), [manual reset options](https://docs.espressif.com/projects/esptool/en/latest/esp8266/esptool/advanced-options.html) and [ESP8266 boot mode selection](https://docs.espressif.com/projects/esptool/en/latest/esp8266/advanced-topics/boot-mode-selection.html) support the documentation-added backup procedure.
 
-Developed and maintained by [Graham van der Wielen](https://github.com/grayum). Created with assistance from ChatGPT & Codex (OpenAI). Independent community project; not affiliated with Eurom. See the repository [MIT License](../../LICENSE).
+Developed by [Graham van der Wielen](https://github.com/grayum) and [Paul (@ph-wheels)](https://github.com/ph-wheels). Maintained by Graham van der Wielen. Paul contributed the original TYWE1S connection/flashing instructions and carrier-board pinout. Created with assistance from ChatGPT & Codex (OpenAI). Independent community project; not affiliated with Eurom. See the repository [MIT License](../../LICENSE).

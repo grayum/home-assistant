@@ -2,13 +2,15 @@
 
 ## Installation and recovery documentation
 
-- [ ] Confirm the maintainer's exact article number, Wi-Fi module, flash size and PCB revisions.
-- [ ] Document a verified way to back up the original manufacturer flash/configuration before modification, including integrity checks and private storage. Distinguish a full flash image from readable settings; do not upload either.
+- [x] Add Paul-contributed TYWE1S carrier-board connection/flashing notes and pinout, with edited spelling and clearer instructions.
+- [x] Add a full-flash backup/readback comparison procedure based on Espressif's documentation, labelled as awaiting device testing.
+- [ ] Confirm the maintainer's exact article number, module/PCB revisions and detected flash size against the contributed TYWE1S drawing and existing YAML profile.
+- [ ] Run the backup procedure on the actual unit and record matching reads, detected capacity and tool version without publishing the dumps or credentials. Distinguish Wi-Fi-module flash from separate heater MCU settings.
 - [ ] Verify restoration/recovery using the owner's own backup and document the limitations.
-- [ ] Document replacing stock firmware with ESPHome for a specifically identified module/revision, with safe isolation, power and programming requirements reviewed by a qualified person.
-- [ ] Document the **internal four-pin connector**: clearly oriented photo, connector numbering, measured supply and logic levels, ground, signal directions, ESP pin mapping, revision and isolation evidence. Do not guess from wire color or the GPIO settings.
+- [ ] Independently verify the contributed stock-to-ESPHome instructions on the identified board revision and record the result, including a qualified review of isolation, supply and logic levels.
+- [ ] Supplement the supplied **four-pin connector** drawing (1=RX, 2=TX, 3=GND, 4=5V) with an oriented board photograph, measured supply/logic levels, confirmed signal directions, traced ESP GPIO mapping, PCB revision and isolation evidence. Do not infer these from the drawing or YAML alone.
 
-These installation items are intentionally placeholders. Contributors may submit evidence-backed PRs. This starter does not provide a wiring diagram or initial flashing commands.
+The [connection/flashing notes](TYWE1S_flashing.txt) and [pinout](images/pinout.png) now provide contributor-supplied starting information. The backup section was added during documentation review; neither it nor restoration has been independently hardware-tested. Remaining checkboxes concern verification and missing evidence, not a claim that the contribution has already been measured or certified.
 
 ## Behavior and compatibility
 

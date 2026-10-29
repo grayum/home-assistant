@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased - TYWE1S documentation contribution 2026-10-29
+
+- Added Paul-contributed `TYWE1S_flashing.txt` and the approved carrier-board `images/pinout.png`, with development credit linking to @ph-wheels.
+- Corrected spelling and clarified board pin numbering, crossed UART connections, the carrier's separate 5 V supply and 3.3 V TTL signaling, manual bootloader entry, browser serial installation and reconnection.
+- Added a documentation-sourced full-flash backup procedure with two reads and comparison; it was absent from the original notes and remains untested on the heater. Restoration remains open.
+- Updated the README, agent instructions, datapoint provenance, test notes and TODOs without changing heater-control YAML or claiming new model compatibility.
+
 ## Unreleased - public starter prepared 2026-10-29
 
 - Added the experimental Eurom Mon Soleil DSP project, attributed datapoint observations and the two maintainer-supplied photographs.

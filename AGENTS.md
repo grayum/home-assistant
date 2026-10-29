@@ -7,7 +7,7 @@ This repository contains public Home Assistant and ESPHome examples. Read the re
 ## Privacy and publication
 
 - Never commit actual credentials, API keys, private addresses, household details, private logs, firmware images or flash backups. Use `!secret` and explicit example values.
-- Only the supplied public configuration and two approved device photographs may be published from the initial source material. Do not add the manufacturer PDF or extracted manual pages. Link to the manufacturer instead.
+- The supplied public configuration, two approved device photographs, Paul-contributed TYWE1S flashing notes and approved pinout image may be published. Do not add the manufacturer PDF or extracted manual pages. Link to the manufacturer instead.
 - Never assume `.gitignore` removes already tracked secrets. Inspect the staged diff and filenames before a commit.
 - Do not embed a remote GitHub package dependency, telemetry or a cloud service into a working local configuration without an explicit request.
 
@@ -19,7 +19,7 @@ This repository contains public Home Assistant and ESPHome examples. Read the re
 - M mode is manual heat control; setting a target temperature does not make M mode thermostatic. Do not describe it otherwise.
 - DP101 is shared by the climate component and a writable select. Account for the climate component writing it on Heat commands. Document and test changes to this interaction.
 - Do not add automatic heating on boot, reconnect or time synchronization. Do not bypass safety mechanisms or create artificial fault conditions to test protections.
-- Keep factory-backup, initial-flash and four-pin-connector instructions as TODO until verified evidence is provided. A qualified contributor may submit a PR with measurements, orientation photos and revision details.
+- TYWE1S_flashing.txt and images/pinout.png contain contributor-supplied carrier-board information. Keep the supplied board numbering separate from bare-module pins and the GPIO assignments in YAML. Distinguish supplied steps from documentation-added backup guidance; do not claim either was independently hardware-tested. Restoration, PCB-revision measurements and connector-to-GPIO tracing remain TODO until evidence is provided.
 
 ## Validation and reporting
 

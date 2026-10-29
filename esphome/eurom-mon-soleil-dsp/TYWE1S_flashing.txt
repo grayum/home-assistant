@@ -1,0 +1,187 @@
+Eurom Mon Soleil DSP: connecting, backing up and flashing a TYWE1S carrier board
+
+Development, original connection/flashing notes and pinout contribution:
+Paul (https://github.com/ph-wheels).
+Editing and integration: Graham van der Wielen, with ChatGPT & Codex assistance.
+
+The pin numbers below refer to the CARRIER BOARD in images/pinout.png, not
+the pins of a bare TYWE1S module. Use the drawing's orientation and numbering.
+The contribution is board-specific; PCB revisions and other heater models have
+not been independently checked. The backup commands in section 4 were added
+during documentation review using Espressif's esptool documentation. They were
+not present in the original notes and have not been tested on this heater.
+
+1. Before connecting anything
+
+This heater contains mains-powered electronics. Internal work must be carried
+out by a competent, qualified person. Disconnect the heater from mains, make
+it safe and remove/disconnect the Wi-Fi carrier board from the heater and ALL
+of its wiring before attaching a computer, USB adapter or external supply.
+Never power it from mains and a programmer/bench supply at the same time.
+
+Use a regulated, current-limited 5 V DC supply for the pictured carrier board
+and a USB-to-UART adapter with verified 3.3 V TTL logic. Check both the board
+revision/pinout and the adapter's actual I/O voltage before powering it: a
+"3.3 V" selector may change only its power output, not the UART signal level.
+Do not use RS-232 signaling or 5 V TTL: either can damage the ESP electronics.
+
+2. Wiring with power off
+
+USB-to-UART adapter connections:
+  Adapter TX  -> carrier pin 9, RXD0
+  Adapter RX  -> carrier pin 10, TXD0
+  Adapter GND -> carrier pin 6, GND
+
+Separate carrier-board power supply connections:
+  Regulated +5 V DC -> carrier pin 4, 5V
+  Supply GND       -> carrier pin 3, GND
+
+The adapter and supply must share the board's ground reference. Verify the
+ground connections on the actual board. Leave the adapter's VCC/5V/3V3 output
+disconnected; power this board from the separate supply only.
+
+The supplied drawing also labels pin 5 as 3.3V. Do NOT apply 5 V to pin 5,
+any UART/BOOT pin, or the bare ESP module. The 5 V instruction above applies
+only to carrier pin 4 on the pictured board, not to a bare module.
+
+Leave the four-pin heater connector's pins 1 (RX) and 2 (TX) disconnected
+during programming. They are not the serial flashing connection described
+here. Pin 8 (TXD1) and pin 11 (RST) are not used by these steps.
+
+3. Enter the serial bootloader
+
+With the carrier supply switched off, temporarily bridge carrier pin 7
+(BOOT) to carrier pin 6 (GND), then switch on the external 5 V supply. The
+supplied procedure uses this bridge to hold the ESP8266 boot input low at
+startup. Remove the bridge once the tool has established a serial connection;
+remove it before the next normal power-up. Do not short arbitrary pins.
+
+For EACH esptool operation below, manually repeat this power-off/bridge/
+power-on sequence. The three-wire UART connection has no automatic reset
+wiring. Stop on unexpected current draw, heating or a failed connection;
+the original notes' idle-current observation is not a safe supply-rating rule.
+
+4. Back up the original flash BEFORE installing ESPHome
+
+Skip this section only if a verified, privately stored factory backup already
+exists. Once overwritten, stock firmware cannot be recovered from ESPHome.
+A flash image may contain credentials and device-specific data; never commit,
+upload or attach it to an issue. A Wi-Fi flash dump does not back up a separate
+heater MCU or prove that all heater schedules/settings can be restored.
+
+On the computer with the USB adapter, use esptool 5.x. In a shell:
+
+  python3 -m venv ~/.venvs/eurom-flash
+  . ~/.venvs/eurom-flash/bin/activate
+  python -m pip install 'esptool>=5,<6'
+  python -m serial.tools.list_ports
+
+Set EUROM_PORT to the ACTUAL serial port, for example:
+
+  EUROM_PORT=/dev/ttyUSB0
+
+On macOS it will normally look like /dev/cu.usbserial-...; on Windows use the
+appropriate COM port (the shell examples above are for macOS/Linux).
+
+Enter the bootloader as in section 3, then detect the flash size:
+
+  python -m esptool --chip esp8266 --port "$EUROM_PORT" --baud 115200 --before no-reset --after no-reset flash-id
+
+Record the detected size privately. Do not infer it from esp01_1m in the YAML.
+Create a NEW private backup directory outside the repository:
+
+  EUROM_BACKUP_DIR="$(mktemp -d "$HOME/eurom-factory-backup.XXXXXX")"
+  chmod 700 "$EUROM_BACKUP_DIR"
+
+Re-enter the bootloader before each read. Read the entire detected flash twice:
+
+  python -m esptool --chip esp8266 --port "$EUROM_PORT" --baud 115200 --before no-reset --after no-reset read-flash 0 ALL "$EUROM_BACKUP_DIR/factory-read-1.bin"
+
+  python -m esptool --chip esp8266 --port "$EUROM_PORT" --baud 115200 --before no-reset --after no-reset read-flash 0 ALL "$EUROM_BACKUP_DIR/factory-read-2.bin"
+
+Compare the files and record checksums:
+
+  cmp "$EUROM_BACKUP_DIR/factory-read-1.bin" "$EUROM_BACKUP_DIR/factory-read-2.bin"
+  python -m esptool version
+  python -c 'import hashlib,pathlib,sys; [(print(p.name, p.stat().st_size, hashlib.sha256(p.read_bytes()).hexdigest())) for p in map(pathlib.Path, sys.argv[1:])]' "$EUROM_BACKUP_DIR/factory-read-1.bin" "$EUROM_BACKUP_DIR/factory-read-2.bin"
+
+Proceed only if both reads succeeded, cmp exits with status 0 and each file's
+size matches flash-id's detected capacity. Two matching reads check readback
+consistency; they do not prove restoration. Store a protected second copy
+elsewhere and record model/article number, module/PCB revision if known,
+detected flash size, tool version and date. Restoration testing remains TODO;
+no erase or restore commands are supplied by this contribution.
+
+5. Prepare ESPHome Device Builder
+
+Only continue after verifying the factory backup. Open ESPHome Device Builder
+in Home Assistant and create a new ESP8266 project (menu labels vary by
+version). Give the device a unique name. Check the detected flash size against
+the supplied configuration's esp01_1m (1 MB) profile before using that profile.
+If it differs, stop and review the board configuration rather than guessing.
+
+Use the project's eurom-400-wifi.yaml and README setup instructions as the
+basis for the new device, retaining its unique name, Wi-Fi settings and API
+key. Merge the example secret entries into the existing PRIVATE secrets.yaml;
+do not overwrite that file or publish its contents. Keep text_sensor: when
+removing any unrelated helper entry. Validate and compile the final YAML.
+
+The original notes flashed a generic ESP8266 project first, then copied in the
+heater configuration and updated over Wi-Fi. Preparing the complete final
+configuration before the first serial flash avoids that extra migration and
+retains the project's encrypted API/OTA setup from the start.
+
+6. Install using the attached USB-to-UART adapter
+
+Use a browser supported by ESPHome's serial installer (normally Chrome/Edge)
+on the computer to which the adapter is attached. Open Device Builder through
+a secure browser context, normally HTTPS; plain HTTP on a remote HA host may
+not offer serial access. Close terminal/monitor programs using the same port.
+
+With the board still disconnected from the heater, enter the serial bootloader
+as in section 3. In Device Builder select Install, then "Plug into this
+computer" (wording may vary). Choose the adapter's serial port and connect.
+Remove the BOOT-to-GND bridge after connection and allow installation to finish.
+Browser serial flashing does not create a factory backup: section 4 comes first.
+
+Switch off the external supply. Confirm the BOOT bridge is removed, then power
+the isolated board normally and check that it joins Wi-Fi and is reachable in
+Device Builder/Home Assistant. With no heater MCU attached, Tuya datapoints
+may be unavailable; that does not by itself indicate a failed flash.
+
+If a browser serial installer is unavailable, stop and consult ESPHome's
+official installation documentation. Do not guess an image type, offset or
+erase command. Do not operate on a port belonging to another device.
+
+7. Disconnect the programmer and reconnect the heater
+
+Turn off the bench supply and disconnect the USB adapter. Remove ALL temporary
+programming/power wires and the boot bridge before reinstalling the board.
+With the heater still disconnected from mains, have the qualified person
+restore its original connector orientation and enclosure. The drawing labels
+the four-pin connector as 1=RX, 2=TX, 3=GND, 4=5V; these are the supplied BOARD
+labels, not an independently traced GPIO map or permission to swap the harness.
+
+Follow README.md and TESTING.md for supervised initial operation. P mode is
+required for thermostat regulation. Subsequent updates can use "Wirelessly" /
+"On the network" with the same installed API/OTA key; follow the official OTA
+migration procedure if changing from an older unencrypted installation.
+
+8. References and evidence limits
+
+Pinout and connection/initial-install sequence: Paul (@ph-wheels), supplied
+through the maintainer on 2026-10-29. This edited guide and drawing have not
+been independently hardware-tested. Board orientation, exact revision,
+connector-to-GPIO tracing, measured voltages/isolation and restoration testing
+remain open evidence items in TODO.md. No heater-control YAML is changed.
+
+Espressif basic commands (flash-id and full read-flash):
+https://docs.espressif.com/projects/esptool/en/latest/esp8266/esptool/basic-commands.html
+Espressif manual reset options:
+https://docs.espressif.com/projects/esptool/en/latest/esp8266/esptool/advanced-options.html
+ESP8266 boot mode selection:
+https://docs.espressif.com/projects/esptool/en/latest/esp8266/advanced-topics/boot-mode-selection.html
+ESPHome getting started / installation:
+https://esphome.io/install/getting-started/
+ESPHome encrypted OTA and migration:
+https://esphome.io/components/ota/esphome/
