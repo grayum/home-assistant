@@ -1,0 +1,2 @@
+# Validation baseline; upgrade deliberately and record the results.
+esphome==2026.10.1
