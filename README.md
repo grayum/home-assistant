@@ -14,6 +14,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for contributions and [AGENTS.md](AGENTS.
 
 Developed and maintained by [Graham van der Wielen](https://github.com/grayum).
 
-Created with assistance from ChatGPT & Codex (OpenAI). AI-assisted changes still require human review and appropriate validation.
+The Eurom ESPHome YAML was developed by [Paul (@ph-wheels)](https://github.com/ph-wheels) alongside Claude AI (Anthropic), with code generation and coding assistance. Repository preparation and documentation also received assistance from ChatGPT & Codex (OpenAI). AI-assisted changes still require human review and appropriate validation.
 
 Original project code, configuration, documentation and contributed photographs are provided under the [MIT License](LICENSE), except third-party names and marks. Eurom, ESPHome and Home Assistant are the property of their respective owners. This is an independent community project with no manufacturer endorsement.

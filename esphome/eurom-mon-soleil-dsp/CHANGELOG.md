@@ -2,6 +2,8 @@
 
 ## Unreleased - TYWE1S documentation contribution 2026-10-29
 
+- Credited Paul for developing the ESPHome YAML alongside Claude AI (Anthropic), including code generation and coding assistance; retained his co-author attribution.
+- Preserved the subsequently supplied original 2 MiB backup command with legacy/current esptool examples and a flash-capacity/profile check. Added an optional post-backup erase step with the ESP8266 target corrected from the supplied ESP32 example.
 - Added Paul-contributed `TYWE1S_flashing.txt` and the approved carrier-board `images/pinout.png`, with development credit linking to @ph-wheels.
 - Corrected spelling and clarified board pin numbering, crossed UART connections, the carrier's separate 5 V supply and 3.3 V TTL signaling, manual bootloader entry, browser serial installation and reconnection.
 - Added a documentation-sourced full-flash backup procedure with two reads and comparison; it was absent from the original notes and remains untested on the heater. Restoration remains open.

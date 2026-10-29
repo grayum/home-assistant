@@ -2,14 +2,17 @@ Eurom Mon Soleil DSP: connecting, backing up and flashing a TYWE1S carrier board
 
 Development, original connection/flashing notes and pinout contribution:
 Paul (https://github.com/ph-wheels).
+Paul developed the ESPHome YAML alongside Claude AI (Anthropic), with code
+generation and coding assistance.
 Editing and integration: Graham van der Wielen, with ChatGPT & Codex assistance.
 
 The pin numbers below refer to the CARRIER BOARD in images/pinout.png, not
 the pins of a bare TYWE1S module. Use the drawing's orientation and numbering.
 The contribution is board-specific; PCB revisions and other heater models have
-not been independently checked. The backup commands in section 4 were added
-during documentation review using Espressif's esptool documentation. They were
-not present in the original notes and have not been tested on this heater.
+not been independently checked. Section 4 preserves the original 2 MiB backup
+command subsequently supplied by the maintainer, alongside current esptool
+syntax and documentation-added verification steps. Backup and erase hardware
+tests have not been performed during this documentation review.
 
 1. Before connecting anything
 
@@ -88,6 +91,28 @@ Enter the bootloader as in section 3, then detect the flash size:
   python -m esptool --chip esp8266 --port "$EUROM_PORT" --baud 115200 --before no-reset --after no-reset flash-id
 
 Record the detected size privately. Do not infer it from esp01_1m in the YAML.
+The maintainer supplied this ORIGINAL backup command, using legacy esptool.py
+and underscore command spelling. Run it only with a compatible older esptool
+installation, from a private backup directory outside the repository, and
+only if the detected capacity is exactly 2 MiB:
+
+  esptool.py -b 115200 --chip esp8266 --port /dev/tty.usbserial-0001 read_flash 0x000000 0x200000 eurom_original_2M_2.bin
+
+Here 0x200000 = 2,097,152 bytes (2 MiB). The serial port is an example and must
+match the actual adapter. This command does not itself establish the flash
+size or prove recovery. A 2 MiB flash chip and the YAML's esp01_1m (1 MiB)
+profile must be reviewed separately; do not infer the right profile from a
+backup filename. For other detected capacities, use the full-size ALL reads
+below rather than a fixed 2 MiB read.
+
+The equivalent esptool 5.x command, using the same section 3 manual bootloader
+entry and a private current directory, is:
+
+  python3 -m esptool --chip esp8266 --port "$EUROM_PORT" --baud 115200 --before no-reset --after no-reset read-flash 0x000000 0x200000 eurom_original_2M_2.bin
+
+Use either syntax with the matching installed tool, not both to the same file.
+These single-read examples do not replace the two-read comparison below.
+
 Create a NEW private backup directory outside the repository:
 
   EUROM_BACKUP_DIR="$(mktemp -d "$HOME/eurom-factory-backup.XXXXXX")"
@@ -110,7 +135,36 @@ size matches flash-id's detected capacity. Two matching reads check readback
 consistency; they do not prove restoration. Store a protected second copy
 elsewhere and record model/article number, module/PCB revision if known,
 detected flash size, tool version and date. Restoration testing remains TODO;
-no erase or restore commands are supplied by this contribution.
+no restoration procedure is supplied by this contribution.
+
+4a. Optional full erase AFTER backup verification
+
+A full erase destroys the current firmware and flash-stored settings. It is
+not a backup command, and is not required for every ESPHome installation:
+normal flashing erases the sectors being written. Use this optional step only
+as a deliberate clean-install/troubleshooting operation after the full backup
+and comparison above succeeded, a protected copy exists elsewhere, and the
+correct replacement firmware has already been prepared and compiled.
+Complete section 5 first, then return here if a full erase is needed. After
+erasing, proceed to the serial installation in section 6.
+
+The maintainer's supplied erase example used "--chip esp32 erase_flash".
+That targets an ESP32; this TYWE1S project uses an ESP8266. The command below
+corrects the target and uses esptool 5.x's hyphenated erase-flash spelling.
+Re-enter the serial bootloader (section 3) and confirm EUROM_PORT identifies
+the intended, isolated carrier board before running:
+
+  python3 -m esptool --chip esp8266 --port "$EUROM_PORT" --baud 115200 --before no-reset --after no-reset erase-flash
+
+For an older esptool version that requires underscore spelling, the corrected
+equivalent is:
+
+  python3 -m esptool --chip esp8266 --port "$EUROM_PORT" --baud 115200 --before no_reset --after no_reset erase_flash
+
+Use the spelling supported by the installed version; do not run both examples.
+After erasing, the board will not boot its previous firmware or join Wi-Fi.
+Continue with the prepared serial installation in sections 5-6; after a full
+erase there is no running ESPHome firmware to accept an OTA installation.
 
 5. Prepare ESPHome Device Builder
 

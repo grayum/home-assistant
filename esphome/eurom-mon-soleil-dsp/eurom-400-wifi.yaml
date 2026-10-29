@@ -1,4 +1,6 @@
 # Eurom Mon Soleil DSP 400 WiFi - ESPHome via Tuya MCU protocol
+# YAML developed by Paul (@ph-wheels) alongside Claude AI (Anthropic),
+# with code generation and coding assistance. See README.md for full credits.
 # Tuya product id: wv9d5ocs76u6maqj
 #
 # Maintainer-reported datapoints (logs + button tests, 2026-10-28).
