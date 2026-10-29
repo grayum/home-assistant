@@ -22,6 +22,7 @@ firmware/
 *.pdf
 
 # Local tooling
+/PUBLISHING.md
 .venv/
 venv/
 __pycache__/

@@ -8,7 +8,7 @@ Community configurations and notes for Home Assistant and ESPHome, developed and
 
 Each project documents its own requirements, observations and limitations. Device compatibility is only claimed when supported by hardware evidence.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contributions, [AGENTS.md](AGENTS.md) for AI-assisted work and [PUBLISHING.md](PUBLISHING.md) for the initial GitHub setup.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contributions and [AGENTS.md](AGENTS.md) for AI-assisted work.
 
 ## Credits and license
 
