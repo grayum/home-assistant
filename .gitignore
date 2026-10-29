@@ -1,0 +1,32 @@
+# Credentials and private deployment configuration
+secrets.yaml
+secrets.yml
+*.local.yaml
+*.local.yml
+.env
+.env.*
+!.env.example
+
+# Firmware, backups, logs and manufacturer documents are not public examples.
+.esphome/
+.pioenvs/
+.piolibdeps/
+backups/
+firmware/
+*.bin
+*.elf
+*.hex
+*.uf2
+*.dump
+*.log
+*.pdf
+
+# Local tooling
+.venv/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+*.swp
+*.swo
+*~
