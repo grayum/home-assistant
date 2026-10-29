@@ -73,3 +73,9 @@ Remaining uncertainties:
 | GitHub Actions | Workflow supplied; not run on GitHub before publication |
 
 Time zone is normally inferred from the build environment when it is not set in YAML. Check the resulting local day/time on the heater; set `time.homeassistant.timezone` explicitly in your private configuration if needed. Time-source availability and timer behavior remain hardware test items.
+
+## TYWE1S documentation contribution - 2026-10-29
+
+Paul (@ph-wheels) supplied connection/initial-flashing notes and a numbered carrier-board drawing through the maintainer. Editing corrects typos (including TYME1S → TYWE1S), clarifies 3.3 V UART logic versus the carrier's 5 V input, and adds a full-flash backup/readback comparison procedure based on Espressif's documentation. Backup commands were absent from the source contribution; they are not presented as a completed device test.
+
+The pin table was checked against the supplied drawing and the original connection notes. No voltage, isolation, connector-to-GPIO, flash-read, flash-write or restoration test was performed during this documentation edit. No heater-control YAML or validation-tooling behavior was changed. Record those hardware results before closing the remaining installation/recovery TODOs.
